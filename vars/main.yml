@@ -1,0 +1,44 @@
+---
+# Don't change this, this is the official simplelogin docker image based on the latest version
+simplelogin_docker_image: simplelogin/app-ci:latest
+
+# Set the name of the your user on the linux VM here
+linuxuser: 
+
+# Set the prefix here (normally it is 'app') (so it becomes https://<prefix>.<domain> to manage the simplelogin interface)
+prefix: app
+
+# The Domain that you own where you want to host simplelogin. If you go to https://<prefix>.<domain> you'll find the simplelogin interface. For example: <prefix>.<domain>
+domain: 
+
+# Here you have to set your secret database details that will be used to configure postgres
+pguser: 
+pgpassword: 
+pgdb: simplelogin
+
+# For flask (signup logic of simplelogin)
+flasksecret: 
+
+# Add postgresql trigger to automatically set each newly registered user to premium (probably useful when selfhosting)
+auto_upgrade_to_premium: true # Set to false to disable
+
+# Set the public IP of your ansible controller machine (e.g. your local machine or another VM with ansible installed) for firewall purposes (to not lock yourself out during installation). If you are on the same subnet, use your local IP.
+ansible_controller_ip: 
+
+# Set your IP from where you want to connect to simplelogin. For example your own IP public address.
+your_home_ip: 
+
+# Some info about you
+support_name: 
+
+# For tls cert renewal notices
+admin_email: 
+
+# Set here the backblaze details to backup the postgres database with your configuration
+backup_to_backblaze: false # Set to true to enable backups. Then you also won't need a backblaze bucket.
+
+# Optional, if you set backup_to_backblaze: true
+application_key_id: 
+application_key: 
+backup_name: 
+backblaze_bucket_name: 

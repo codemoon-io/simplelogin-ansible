@@ -1,0 +1,7 @@
+all:
+  hosts:
+    simplelogin-vm:
+      ansible_ssh_private_key_file:          # The path to the private ssh key
+      ansible_become_pass:                   # The password for the user to become sudo
+      ansible_host:                          # The IP address of the VM 
+      ansible_user: "{{ linuxuser }}"        # Don't change this

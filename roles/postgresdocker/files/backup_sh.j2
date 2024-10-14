@@ -1,0 +1,6 @@
+#!/bin/bash
+
+docker exec -e PGPASSWORD={{ pgpassword }} sl-db  pg_dump -h localhost -U {{ pguser }} {{ pgdb }} > /home/{{ linuxuser }}/{{ backup_name }}.sql
+/home/{{ linuxuser }}/b2 account authorize {{ application_key_id }} {{ application_key }} 
+/home/{{ linuxuser }}/b2 file upload {{ backblaze_bucket_name }}  /home/{{ linuxuser }}/{{ backup_name }}.sql {{ backup_name }}.sql 
+rm /home/{{ linuxuser }}/{{ backup_name }}.sql

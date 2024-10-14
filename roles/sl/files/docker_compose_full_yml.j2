@@ -1,0 +1,71 @@
+---
+networks:
+  default:
+    name: sl-network
+    external: true
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+          gateway: 10.0.0.1
+
+services:
+  sl-db:
+    container_name: sl-db
+    image: postgres:12.1
+    ports:
+      - 5432:5432
+    volumes:
+      - /home/{{ linuxuser }}/sl/db:/var/lib/postgresql/data
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER={{ pguser }}
+      - POSTGRES_PASSWORD={{ pgpassword }}
+      - POSTGRES_DB={{ pgdb }}
+    
+  sl-app:
+    image: {{ simplelogin_docker_image }}
+    container_name: sl-app
+    ports:
+      - "7777:7777"
+    volumes:
+      - "/home/{{ linuxuser }}/sl:/sl"
+      - "/home/{{ linuxuser }}/sl/upload:/code/static/upload"
+      - "/home/{{ linuxuser }}/simplelogin.env:/code/.env"
+      - "/home/{{ linuxuser }}/dkim.key:/dkim.key:ro"
+      - "/home/{{ linuxuser }}/dkim.pub.key:/dkim.pub.key:ro"
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+
+  sl-email:
+    image: {{ simplelogin_docker_image }}
+    container_name: sl-email
+    command: python email_handler.py
+    ports:
+      - "20381:20381"
+    volumes:
+      - "/home/{{ linuxuser }}/sl:/sl"
+      - "/home/{{ linuxuser }}/sl/upload:/code/static/upload"
+      - "/home/{{ linuxuser }}/simplelogin.env:/code/.env"
+      - "/home/{{ linuxuser }}/dkim.key:/dkim.key:ro"
+      - "/home/{{ linuxuser }}/dkim.pub.key:/dkim.pub.key:ro"
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+
+  sl-job-runner:
+    image: {{ simplelogin_docker_image }}
+    container_name: sl-job-runner
+    command: python job_runner.py
+    volumes:
+      - "/home/{{ linuxuser }}/sl:/sl"
+      - "/home/{{ linuxuser }}/sl/upload:/code/static/upload"
+      - "/home/{{ linuxuser }}/simplelogin.env:/code/.env"
+      - "/home/{{ linuxuser }}/dkim.key:/dkim.key:ro"
+      - "/home/{{ linuxuser }}/dkim.pub.key:/dkim.pub.key:ro"
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000

@@ -1,0 +1,20 @@
+- name: Generate dkim.key if it doesn't exist
+  ansible.builtin.shell: openssl genrsa -out dkim.key.inc 1024
+  args:
+    chdir: "/home/{{ linuxuser }}/"
+    creates: dkim.key.inc
+    executable: /bin/bash
+
+- name: Revert to compatible PKCS#1 for dkimpy
+  ansible.builtin.shell: openssl rsa -in dkim.key.inc -traditional -out dkim.key
+  args:
+    chdir: "/home/{{ linuxuser }}/"
+    executable: /bin/bash
+    creates: dkim.key
+
+- name: Generate dkim.pub.key if it doesn't exist
+  ansible.builtin.shell: openssl rsa -in dkim.key -pubout -out dkim.pub.key
+  args:
+    chdir: "/home/{{ linuxuser }}/"
+    creates: dkim.pub.key
+    executable: /bin/bash

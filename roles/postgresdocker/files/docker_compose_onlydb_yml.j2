@@ -1,0 +1,23 @@
+---
+networks:
+  default:
+    name: sl-network
+    external: true
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+          gateway: 10.0.0.1
+
+services:
+  sl-db:
+    container_name: sl-db
+    image: postgres:12.1
+    ports:
+      - 5432:5432
+    volumes:
+      - /home/{{ linuxuser }}/sl/db:/var/lib/postgresql/data
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER={{ pguser }}
+      - POSTGRES_PASSWORD={{ pgpassword }}
+      - POSTGRES_DB={{ pgdb }}

@@ -1,0 +1,4 @@
+---
+docker_users:
+  - "{{ linuxuser }}"
+# Empty file

@@ -1,0 +1,36 @@
+---
+- name: Create backup shell script for postgres
+  ansible.builtin.template:
+    src: roles/postgresdocker/files/backup_sh.j2
+    dest: "/root/backuppostgres.sh"
+    owner: "root"
+    group: "root"
+    mode: '0700'
+    
+- name: Download b2 tools
+  ansible.builtin.get_url:
+    url: https://github.com/Backblaze/B2_Command_Line_Tool/releases/latest/download/b2-linux
+    dest: "/home/{{ linuxuser }}/b2"
+    mode: '755'
+
+- name: Ensure package cache is up to date
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Ensure cron is installed.
+  package:
+    name: cron
+    state: present
+
+- name: Adds "PATH=..." on top of crontab
+  ansible.builtin.cron:
+    name: PATH
+    env: yes
+    job: /usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+
+- name: Ensure postgres cron job to exist. Backups every 4 hours to backblaze
+  ansible.builtin.cron:
+    name: "backup postgres and upload to backblaze"
+    minute: "0"
+    hour: "*/4"
+    job: "'/root/backuppostgres.sh' >> /root/cron.log 2>&1"

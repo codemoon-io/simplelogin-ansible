@@ -1,0 +1,19 @@
+- name: Creates directory
+  ansible.builtin.file:
+    path: "/home/{{ linuxuser }}/sl"
+    state: directory
+
+- name: Creates directory
+  ansible.builtin.file:
+    path: "/home/{{ linuxuser }}/sl/db"
+    state: directory
+    
+- name: Creates directory
+  ansible.builtin.file:
+    path: "/home/{{ linuxuser }}/sl/upload"
+    state: directory
+
+- name: Creates directory
+  ansible.builtin.file:
+    path: "/home/{{ linuxuser }}/sl/pgp"
+    state: directory

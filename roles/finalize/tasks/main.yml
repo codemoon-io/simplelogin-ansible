@@ -1,0 +1,6 @@
+- name: Finalize
+  ansible.builtin.debug:
+    msg:
+    - "Your deployment is ready and can be found at https://{{ prefix }}.{{ domain }}"
+    - "You may need to wait for a small time for simplelogin to get started (max 20 secs)."
+    - "Enjoy!"

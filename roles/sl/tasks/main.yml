@@ -1,0 +1,17 @@
+- name: Tear down existing services
+  community.docker.docker_compose_v2:
+    project_src: "/home/{{ linuxuser }}"
+    state: absent
+
+- name: Create docker compose file with everything in it, with our own container and changes from branch codemoon-changes
+  ansible.builtin.template:
+    src: "roles/sl/files/docker_compose_full_yml.j2"
+    dest: "/home/{{ linuxuser }}/docker-compose.yml"
+    owner: "{{ linuxuser }}"
+    group: "{{ linuxuser }}"
+    mode: '0644'
+
+- name: Bring up existing services
+  community.docker.docker_compose_v2:
+    project_src: "/home/{{ linuxuser }}"
+    state: present 

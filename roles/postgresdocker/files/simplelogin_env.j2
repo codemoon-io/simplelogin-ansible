@@ -1,0 +1,36 @@
+# WebApp URL
+URL=http://{{ prefix }}.{{ domain }}
+
+# domain used to create alias
+EMAIL_DOMAIN={{ domain }}
+
+# transactional email is sent from this email address
+SUPPORT_EMAIL=support@{{ domain }}
+
+SUPPORT_NAME={{ support_name }}
+
+ADMIN_EMAIL={{ admin_email }}
+
+# Disable onboarding emails
+DISABLE_ONBOARDING=true
+
+# custom domain needs to point to these MX servers
+EMAIL_SERVERS_WITH_PRIORITY=[(10, "{{ prefix }}.{{ domain }}.")]
+
+# By default, new aliases must end with ".{random_word}". This is to avoid a person taking all "nice" aliases.
+# this option doesn't make sense in self-hosted. Set this variable to disable this option.
+DISABLE_ALIAS_SUFFIX=1
+
+# the DKIM private key used to compute DKIM-Signature
+DKIM_PRIVATE_KEY_PATH=/dkim.key
+
+# DB Connection
+DB_URI=postgresql://{{ pguser }}:{{ pgpassword }}@sl-db:5432/{{ pgdb }}
+
+FLASK_SECRET={{ flasksecret }}
+
+GNUPGHOME=/sl/pgp
+
+LOCAL_FILE_UPLOAD=1
+
+POSTFIX_SERVER=10.0.0.1

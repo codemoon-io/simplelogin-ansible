@@ -1,0 +1,61 @@
+---
+  - name: Ensure debconf-utils is installed
+    ansible.builtin.apt:
+      name: debconf-utils
+      state: present
+    when: ansible_facts['os_family'] == "Debian"
+
+  - name: Preseed Postfix configuration for Internet Site
+    ansible.builtin.debconf:
+      name: "postfix"
+      question: "{{ item.question }}"
+      value: "{{ item.value }}"
+      vtype: "{{ item.vtype }}"
+    loop:
+      - { question: "main_mailer_type", value: "Internet Site", vtype: "select" }
+      - { question: "mailname", value: "{{ domain }}", vtype: "string" }
+      - { question: "destinations", value: "{{ domain }}, localhost.localdomain, localhost", vtype: "string" }
+
+  - name: Install postfix
+    ansible.builtin.apt:
+      name: postfix
+      autoremove: true
+      update_cache: true
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+
+  - name: Install Postfix-pgsql
+    ansible.builtin.apt:
+      name: postfix-pgsql
+      state: present
+
+  - name: Enable and start Postfix service
+    ansible.builtin.systemd:
+      name: postfix
+      enabled: yes
+      state: started
+      
+  - name: Configure Postfix main.cf
+    ansible.builtin.template:
+      src: roles/postfix/files/postfix_main_cf.j2
+      dest: /etc/postfix/main.cf
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Configure relay domains
+    ansible.builtin.template:
+      src: roles/postfix/files/pgsql_relay_domains_cf.j2
+      dest: /etc/postfix/pgsql-relay-domains.cf
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Configure Postfix transport maps
+    ansible.builtin.template:
+      src: roles/postfix/files/pgsql_transport_maps_cf.j2
+      dest: /etc/postfix/pgsql-transport-maps.cf
+      owner: root
+      group: root
+      mode: '0644'
+    notify: restart postfix

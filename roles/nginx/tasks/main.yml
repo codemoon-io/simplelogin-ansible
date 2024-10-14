@@ -1,0 +1,96 @@
+---
+- name: Ensure nginx is installed.
+  package:
+    name: nginx
+    state: present
+
+- name: Ensure python3-certbot-nginx is installed.
+  package:
+    name: python3-certbot-nginx
+    state: present
+
+- name: Create nginx configuration for simplelogin
+  ansible.builtin.template:
+    src: roles/nginx/files/simplelogin.j2
+    dest: "/etc/nginx/sites-enabled/simplelogin"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Reload nginx
+  become: true
+  ansible.builtin.shell: systemctl reload nginx
+  args:
+    executable: /bin/bash
+
+- name: Ensure certbot is installed.
+  package:
+    name: certbot
+    state: present
+
+- name: Allow all access to tcp port 80
+  community.general.ufw:
+    rule: allow
+    port: '80'
+    proto: tcp
+
+- name: Create certificate with certbot
+  become: true
+  ansible.builtin.shell: certbot --nginx --agree-tos -d {{ prefix }}.{{ domain }} -m "{{ admin_email }}"
+  args:
+    executable: /bin/bash
+
+- name: Create cronjob to renew certificate monthly with certbot
+  become: true
+  ansible.builtin.cron: 
+    name: "Renew certificate with nginx monthly"
+    minute: 0
+    hour: 3
+    day: 1
+    month: "*"
+    job: "certbot --nginx --agree-tos -d {{ prefix }}.{{ domain }} -m info@codemoon.io --force-renewal"
+
+- name: Remove all access to tcp port 80
+  community.general.ufw:
+    rule: deny
+    port: '80'
+    proto: tcp
+
+- name: Update cert & keyfile in /etc/postfix/main.cf
+  lineinfile:
+    dest: "/etc/postfix/main.cf"
+    line: "{{ item.name }}={{ item.value }}"
+    regexp: "^{{ item.name }}="
+    mode: 0644
+  with_items:
+    - name: smtpd_tls_cert_file
+      value: "/etc/letsencrypt/live/{{ prefix }}.{{ domain }}/fullchain.pem"
+    - name: smtpd_tls_key_file
+      value: "/etc/letsencrypt/live/{{ prefix }}.{{ domain }}/privkey.pem"
+  notify: restart postfix
+
+- name: Tear down existing services
+  community.docker.docker_compose_v2:
+    project_src: "/home/{{ linuxuser }}"
+    state: absent
+
+- name: Modify simplelogin.env URL to https
+  lineinfile:
+    dest: "/home/{{ linuxuser }}/simplelogin.env"
+    line: "{{ item.name }}={{ item.value }}"
+    regexp: "^{{ item.name }}="
+    mode: 0644
+  with_items:
+    - name: URL
+      value: "https://{{ prefix }}.{{ domain }}"
+
+- name: Bring up existing services
+  community.docker.docker_compose_v2:
+    project_src: "/home/{{ linuxuser }}"
+    state: present
+
+- name: Reload nginx
+  become: true
+  ansible.builtin.shell: systemctl reload nginx
+  args:
+    executable: /bin/bash

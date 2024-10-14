@@ -1,0 +1,9 @@
+---
+- name: Ensure package cache is up to date
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Ensure dnsutils is installed.
+  package:
+    name: dnsutils
+    state: present

@@ -1,0 +1,37 @@
+- name: Ensure package cache is up to date
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Ensure ufw is installed.
+  package:
+    name: ufw
+    state: present
+
+- name: Allow all access to tcp port 25
+  community.general.ufw:
+    rule: allow
+    port: '25'
+    proto: tcp
+
+- name: Allow home_ips to 443 for dev
+  community.general.ufw:
+    port: '443'
+    rule: allow
+    proto: tcp
+    from_ip: "{{ item }}"
+  loop:
+    - "{{ your_home_ip }}"  # your IP so you can access the simplelogin app (can be your local ip)
+
+- name: Allow home_ips to 22 for dev
+  community.general.ufw:
+    rule: allow
+    name: OpenSSH
+    from_ip: "{{ item }}"
+  loop:
+    - "{{ ansible_controller_ip }}" # ip of ansible VM that connects to the target VM
+    - "{{ your_home_ip }}" # your IP address so you can manually modify the configuration further
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+    policy: deny

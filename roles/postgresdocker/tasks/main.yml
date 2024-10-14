@@ -1,0 +1,52 @@
+- name: Create docker compose file with only postgres db in it
+  ansible.builtin.template:
+    src: "roles/postgresdocker/files/docker_compose_onlydb_yml.j2"
+    dest: "/home/{{ linuxuser }}/docker-compose.yml"
+    owner: "{{ linuxuser }}"
+    group: "{{ linuxuser }}"
+    mode: '0644'
+
+- name: Create simplelogin.env
+  ansible.builtin.template:
+    src: roles/postgresdocker/files/simplelogin_env.j2
+    dest: "/home/{{ linuxuser }}/simplelogin.env"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Bring up existing services
+  community.docker.docker_compose_v2:
+    project_src: "/home/{{ linuxuser }}"
+    state: present
+
+- name: Run database migration on postgres with {{ simplelogin_docker_image }}
+  ansible.builtin.shell: |
+    docker run --rm \
+      --name sl-migration \
+      -v /home/{{ linuxuser }}/sl:/sl \
+      -v /home/{{ linuxuser }}/sl/upload:/code/static/upload \
+      -v /home/{{ linuxuser }}/dkim.key:/dkim.key \
+      -v /home/{{ linuxuser }}/dkim.pub.key:/dkim.pub.key \
+      -v /home/{{ linuxuser }}/simplelogin.env:/code/.env \
+      --network="sl-network" \
+      {{ simplelogin_docker_image }} alembic upgrade head
+  args:
+    executable: /bin/bash
+
+- name: Run second migration (init data) on postgres with {{ simplelogin_docker_image }}
+  ansible.builtin.shell: |
+    docker run --rm \
+      --name sl-init \
+      -v /home/{{ linuxuser }}/sl:/sl \
+      -v /home/{{ linuxuser }}/simplelogin.env:/code/.env \
+      -v /home/{{ linuxuser }}/dkim.key:/dkim.key \
+      -v /home/{{ linuxuser }}/dkim.pub.key:/dkim.pub.key \
+      --network="sl-network" \
+      {{ simplelogin_docker_image }} python init_app.py
+  args:
+    executable: /bin/bash
+
+- include_tasks: trigger.yml
+  when: auto_upgrade_to_premium == true
+- include_tasks: backupcron.yml
+  when: backup_to_backblaze == true

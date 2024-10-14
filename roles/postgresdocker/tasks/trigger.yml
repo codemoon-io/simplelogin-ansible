@@ -1,0 +1,21 @@
+---
+- name: Install python3-psycopg2
+  ansible.builtin.apt:
+    name: python3-psycopg2
+    state: present
+
+- name: Create codemoon patches sql file
+  ansible.builtin.template:
+    src: "roles/postgresdocker/files/codemoonpatches_sql.j2"
+    dest: "/home/{{ linuxuser }}/codemoonpatches.sql"
+    owner: "{{ linuxuser }}"
+    group: "{{ linuxuser }}"
+    mode: '0644'
+
+- name: Select from test using search_path
+  community.postgresql.postgresql_script:
+    path: "/home/{{ linuxuser }}/codemoonpatches.sql"
+    db: "{{ pgdb }}"
+    login_user: "{{ pguser }}"
+    login_password: "{{ pgpassword }}"
+    login_host: localhost

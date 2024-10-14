@@ -1,0 +1,9 @@
+# postgres config
+hosts = localhost
+user = {{ pguser }}
+password = {{ pgpassword }}
+dbname = {{ pgdb }}
+
+query = SELECT domain FROM custom_domain WHERE domain='%s' AND verified=true
+    UNION SELECT domain FROM public_domain WHERE domain='%s'
+    UNION SELECT '%s' WHERE '%s' = '{{ domain }}' LIMIT 1;
