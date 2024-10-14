@@ -35,7 +35,7 @@ support_name:
 admin_email: 
 
 # Set here the backblaze details to backup the postgres database with your configuration
-backup_to_backblaze: false # Set to true to enable backups. Then you also won't need a backblaze bucket.
+backup_to_backblaze: false # Set to true to enable backups.
 
 # Optional, if you set backup_to_backblaze: true
 application_key_id: 
