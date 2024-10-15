@@ -32,7 +32,7 @@ We have been experimenting with deploying this ourselves for email privacy apps 
 | postgresdocker | This role installs postgres with a docker container and runs the necessary migrations for simplelogin. Optionally it also creates a backup cronjob and uploads the result to backblaze if enabled. Optionally a postgres trigger is added that automatically sets new users to premium. |
 | postfix | This role automatically installs postfix with the correct installation steps, installs the package postfix-pgsql and creates the required configuration files for postfix. |
 | sl | This role creates the docker compose file and creates all docker containers of the simplelogin stack. |
-| nginx | This role creates an nginx reverse proxy in front of your simplelogin app and automatically configures a TLS certificate signed by let's encrypt. In case you have your own reverse proxy like traefik or caddy you can skip this step by e.g. commenting it away. |
+| nginx | This role creates an nginx reverse proxy in front of your simplelogin app and automatically configures a TLS certificate signed by let's encrypt. In case you would like to use your own reverse proxy like traefik or caddy you can modify this step. Make sure you keep updating the postfix main.cf file to use the new certificates. |
 | finalize | This role echoes a message to your console with the link to your simplelogin instance. |
 
 ## Prerequisites
