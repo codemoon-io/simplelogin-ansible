@@ -5,7 +5,7 @@
     - { role: packages, become: yes }
     - { role: firewall, become: yes }
     - dirs
-    - { role: docker, become: yes }
+    - { role: geerlingguy.docker, become: yes }
     - { role: postgresdocker, become: yes }
     - { role: postfix, become: yes }
     - { role: sl, become: yes }

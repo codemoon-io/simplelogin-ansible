@@ -44,7 +44,7 @@ We have been experimenting with deploying this ourselves for email privacy apps 
 - Linux user added to sudoers group
 - Ansible-core >= 2.17.4 on your controller machine (tested with ansible-core 2.17.4)
 - Ansible collections installed: 
-    - `ansible-galaxy collection install geerlingguy.docker`
+    - `ansible-galaxy role install geerlingguy.docker`
     - `ansible-galaxy collection install community.general`
     - `ansible-galaxy collection install community.docker`
     - `ansible-galaxy collection install community.postgresql`
