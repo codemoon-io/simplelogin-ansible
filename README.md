@@ -1,6 +1,6 @@
 # SimpleLogin Ansible Roles
 
-This repository is a collection of ansible roles designed to help deploy a self-hosted version of [SimpleLogin](https://simplelogin.io/), an open-source email aliasing service. This deployment optionally supports automatic backups of the postgres database to backblaze and optionally automatically sets any user that is created to lifetime premium. It uses docker compose to run the simplelogin stack.
+This repository is a collection of ansible roles designed to help deploy a self-hosted version of [SimpleLogin](https://simplelogin.io/), an open-source email aliasing service. This script automates the steps [as outlined by SimpleLogin](https://github.com/simple-login/app/blob/master/README.md). This deployment optionally supports automatic backups of the postgres database to backblaze and optionally automatically sets any user that is created to lifetime premium. It uses docker compose to run the simplelogin python applications. Nginx and postfix will run without docker on the system.
 
 ## Why this repository?
 
@@ -15,10 +15,14 @@ The goal of these roles is to:
 We have been experimenting with deploying this ourselves for email privacy apps we are building at [Codemoon](https://codemoon.io/). Ultimately we ran into uncertainties regarding email deliverability and opted to use another email provider to handle this. However, for those self-hosting, SimpleLogin should work well enough and this ansible playbook can assist in deploying it efficiently and repeatably.
 
 ## Features
-- Automated installation of dependencies and setup of simplelogin.
-- Configures nginx tls certificate with let's encrypt, databases, and SimpleLogin backend/frontend components.
-- Automatically (optionally) sets your newly registered users to lifetime premium.
-- Extensible roles that can be adapted for specific configurations and setups.
+- Automated installation and configuration of dependencies and firewall of the VM.
+- Configures nginx with a tls certificate with let's encrypt. You can disable this easily by commenting out the role in deploy-sl.yml if you use your own reverse proxy. 
+- Runs database migrations, sets up database, and SimpleLogin backend/frontend components.
+- Sets up simplelogin stack, you end up with a docker compose setup.
+
+#### Optional features (can be enabled):
+- Automatically set your newly registered users to lifetime premium.
+- Create backups of the database to backblaze
 
 ## What the ansible roles do:
 
@@ -28,7 +32,8 @@ We have been experimenting with deploying this ourselves for email privacy apps 
 | packages   | This role installs packages dnsutils that you can use for debugging dns records |
 | firewall | This role installs ufw and configures the firewall of your VM |
 | dirs | This role creates the directories sl, sl/db, sl/pgp and sl/upload with the correct permissions. | 
-| docker | This role installs docker, creates the docker network and adds your user to the docker group. |
+| geerlingguy.docker | This role installs docker, creates the docker network and adds your user to the docker group. |
+| dockerconfig | This role configures the docker network. |
 | postgresdocker | This role installs postgres with a docker container and runs the necessary migrations for simplelogin. Optionally it also creates a backup cronjob and uploads the result to backblaze if enabled. Optionally a postgres trigger is added that automatically sets new users to premium. |
 | postfix | This role automatically installs postfix with the correct installation steps, installs the package postfix-pgsql and creates the required configuration files for postfix. |
 | sl | This role creates the docker compose file and creates all docker containers of the simplelogin stack. |
