@@ -1,0 +1,6 @@
+- name: Ensure network exists
+  community.docker.docker_network:
+    name: sl-network
+    ipam_config:
+      - subnet: 10.0.0.0/24
+        gateway: 10.0.0.1
